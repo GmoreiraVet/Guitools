@@ -2,6 +2,7 @@ import pandas as pd
 import glob
 import plotly.express as px
 import os
+import re
 
 def load_bracken_files(input_folder, rank="G", top_n=15):
     """
@@ -18,6 +19,9 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
     """
     file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
     dataframes = []
+
+    # Use regex to extract numeric part from the filename and sort the files accordingly
+    file_paths.sort(key=lambda x: int(re.search(r'(\d+)', os.path.basename(x)).group(0)))  # Extract first number from filename
 
     # Load each Bracken report file
     for file in file_paths:
@@ -50,20 +54,21 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
 
     return combined_df_with_other
 
-def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
+def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html", png_file="taxonomic_abundance_stacked_bar.png"):
     """
     Plot a stacked bar chart of taxonomic abundance using plotly and save to file.
     
     Args:
     - data (pd.DataFrame): The data ready for stacked bar plotting.
-    - output_file (str): Path to save the generated plot.
+    - output_file (str): Path to save the generated plot in HTML format.
+    - png_file (str): Path to save the generated plot in PNG format.
     """
     if data.empty:
         print("No data available to plot.")
         return
     
     # Define a custom color sequence or use a predefined one
-    color_palette = px.colors.qualitative.Plotly  # You can choose 'Vivid', 'Pastel', 'Dark2', etc.
+    color_palette = px.colors.qualitative.Pastel  # You can choose 'Vivid', 'Pastel', 'Dark2', etc.
 
     # Get unique taxa names
     taxa_names = data['name'].unique()
@@ -71,8 +76,8 @@ def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
     # Dynamically assign colors by cycling through the chosen palette
     color_map = {taxa: color_palette[i % len(color_palette)] for i, taxa in enumerate(taxa_names)}
     
-    # Force "Other" category to be light gray
-    color_map["Other"] = "lightgray"
+    # Force "Other" category to be grey
+    color_map["Other"] = "gray"
 
     # Plot with the automatically mapped colors
     fig = px.bar(data, 
@@ -83,14 +88,18 @@ def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
                  labels={"fraction_total_reads": "Relative Abundance", "sample_id": "Sample ID", "name": "Taxon"},
                  title="Taxonomic Abundance Stacked Bar Plot Across Samples")
     fig.update_layout(barmode='stack', xaxis_tickangle=-45)
+
+    # Save as HTML and PNG
     fig.write_html(output_file)
+    fig.write_image(png_file)  # Save as PNG (requires kaleido or other renderers)
     fig.show()
-    print(f"Stacked bar plot saved to {output_file}")
+    print(f"Stacked bar plot saved to {output_file} and {png_file}")
 
 if __name__ == "__main__":
     input_folder = "/home/viroicbas/scriptTeste/bracken_reports"
     output_file = "taxonomic_abundance_stacked_bar.html"
+    png_file = "taxonomic_abundance_stacked_bar.png"
 
     # Load data and generate stacked bar plot
     bar_data = load_bracken_files(input_folder, rank="G", top_n=15)
-    plot_stacked_bar(bar_data, output_file)
+    plot_stacked_bar(bar_data, output_file, png_file)
