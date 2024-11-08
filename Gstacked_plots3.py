@@ -39,8 +39,16 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
     # Find the top N taxa across all samples based on fraction_total_reads
     top_taxa = filtered_df.groupby("name")["fraction_total_reads"].sum().nlargest(top_n).index
     top_taxa_df = filtered_df[filtered_df["name"].isin(top_taxa)]
+    
+    # Calculate the "Other" category (sum of the remaining taxons)
+    other_taxa_df = filtered_df[~filtered_df["name"].isin(top_taxa)]
+    other_taxa_sum = other_taxa_df.groupby(["sample_id"])["fraction_total_reads"].sum().reset_index()
+    other_taxa_sum["name"] = "Other"
+    
+    # Combine the top taxa with the "Other" category
+    combined_df_with_other = pd.concat([top_taxa_df, other_taxa_sum])
 
-    return top_taxa_df
+    return combined_df_with_other
 
 def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
     """
@@ -55,13 +63,16 @@ def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
         return
     
     # Define a custom color sequence or use a predefined one
-    color_palette = px.colors.qualitative.Pastel  # You can choose 'Vivid', 'Pastel', 'Dark2', etc.
+    color_palette = px.colors.qualitative.Plotly  # You can choose 'Vivid', 'Pastel', 'Dark2', etc.
 
     # Get unique taxa names
     taxa_names = data['name'].unique()
     
     # Dynamically assign colors by cycling through the chosen palette
     color_map = {taxa: color_palette[i % len(color_palette)] for i, taxa in enumerate(taxa_names)}
+    
+    # Force "Other" category to be light gray
+    color_map["Other"] = "lightgray"
 
     # Plot with the automatically mapped colors
     fig = px.bar(data, 
@@ -83,4 +94,3 @@ if __name__ == "__main__":
     # Load data and generate stacked bar plot
     bar_data = load_bracken_files(input_folder, rank="G", top_n=15)
     plot_stacked_bar(bar_data, output_file)
-
