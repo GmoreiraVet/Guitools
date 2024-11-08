@@ -16,29 +16,6 @@ def natural_sort(file_paths):
     # Sort the files based on the extracted number from the file name
     return sorted(file_paths, key=lambda x: extract_number(os.path.basename(x)))
 
-def prompt_for_sample_names(file_paths):
-    """
-    Prompt the user to input custom names for each sample file in the correct order.
-    
-    Args:
-    - file_paths (list): List of file paths to be named.
-    
-    Returns:
-    - dict: A dictionary mapping file names to user-provided sample names.
-    """
-    sample_names = {}
-    for file in file_paths:
-        # Get the sample id from the file name (before '_bracken.txt')
-        sample_id = os.path.basename(file).replace("_bracken.txt", "")
-        
-        # Prompt the user for a sample name
-        sample_name = input(f"Enter a custom name for sample {sample_id}: ")
-        
-        # Save the custom name in the dictionary
-        sample_names[sample_id] = sample_name
-    
-    return sample_names
-
 def load_bracken_files(input_folder, rank="G", top_n=15):
     """
     Load and combine Bracken report files from a specified folder, filter by taxonomic level (rank), 
@@ -55,16 +32,16 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
     file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
     file_paths = natural_sort(file_paths)  # Sort files naturally by numeric order
     
-    # Prompt for custom sample names
-    sample_names = prompt_for_sample_names(file_paths)
-    
+    # Assign sample names automatically based on filenames
+    sample_names = {os.path.basename(file).replace("_bracken.txt", ""): os.path.basename(file).replace("_bracken.txt", "") for file in file_paths}
+
     dataframes = []
 
     # Load each Bracken report file
     for file in file_paths:
         sample_id = os.path.basename(file).replace("_bracken.txt", "")
         
-        # Use the custom sample name if provided
+        # Use the automatically assigned sample name
         custom_sample_name = sample_names.get(sample_id, sample_id)
         
         # Load the Bracken file and assign the custom sample name
