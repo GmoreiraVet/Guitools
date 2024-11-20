@@ -137,6 +137,32 @@ def plot_rarefaction_curves_html(rarefaction_results, output_file="rarefaction_c
     fig.show()
     print(f"Rarefaction curve saved to {output_file}")
 
+def print_success_ascii():
+    """
+    Prints a bunny with a speech bubble saying 'SUCCESS'.
+    """
+    print("""
+    
+  SUCCESS !! 
+   
+   __     __
+  /_/|   |\\_\\  
+   |U|___|U|
+   |       |
+   | ,   , |
+  (  = Y =  )
+   |      |
+  /|       |\\
+  \\| |   | |/
+ (_|_|___|_|_)
+   '"'   '"'
+
+------------------------------------------------
+Thank you for visiting https://asciiart.website/
+This ASCII pic can be found at
+https://asciiart.website/index.php?art=animals/rabbits
+    """)
+
 if __name__ == "__main__":
     input_folder = "/home/viroicbas/scriptTeste/bracken_reports"  # Update with your folder containing Bracken files
     output_file = "rarefaction_curve_with_log_fit.html"
@@ -152,3 +178,5 @@ if __name__ == "__main__":
     # Plot and save the rarefaction curves as an HTML file with the logarithmic fit and standard deviation
     plot_rarefaction_curves_html(rarefaction_results, output_file)
 
+    # After plotting, print the success message with the ASCII bunny
+    print_success_ascii()
