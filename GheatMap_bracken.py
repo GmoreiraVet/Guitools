@@ -3,7 +3,33 @@ import glob
 import plotly.express as px
 import os
 
-def load_bracken_files(input_folder, rank="G", top_n=20): #Change parameters here and at the bottom of the script, for reasons
+def get_custom_sample_names(original_names):
+    """
+    Prompt the user to enter custom names for samples.
+    
+    Args:
+    - original_names (list): List of original sample names.
+    
+    Returns:
+    - dict: A dictionary mapping original names to custom names.
+    """
+    print("Original sample names detected:")
+    for name in original_names:
+        print(f" - {name}")
+    
+    print("\nEnter custom names for each sample (press Enter to keep the original name):")
+    name_mapping = {}
+    for name in original_names:
+        custom_name = input(f"Custom name for '{name}': ").strip()
+        name_mapping[name] = custom_name if custom_name else name
+    
+    print("\nSample names have been updated:")
+    for old, new in name_mapping.items():
+        print(f" - {old} → {new}")
+    
+    return name_mapping
+
+def load_bracken_files(input_folder, rank="G", top_n=15):
     """
     Load and combine Bracken report files from a specified folder, filter by taxonomic level (rank), 
     and keep top N taxa.
@@ -20,11 +46,18 @@ def load_bracken_files(input_folder, rank="G", top_n=20): #Change parameters her
     file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
     dataframes = []
 
+    # Extract original sample names
+    sample_ids = [os.path.basename(file).replace("_bracken.txt", "") for file in file_paths]
+    
+    # Allow user to rename samples
+    name_mapping = get_custom_sample_names(sample_ids)
+
     # Load each Bracken report file
     for file in file_paths:
         sample_id = os.path.basename(file).replace("_bracken.txt", "")  # Extract sample ID from file name
+        custom_sample_id = name_mapping[sample_id]  # Map to custom name
         df = pd.read_csv(file, sep="\t", usecols=["name", "taxonomy_lvl", "fraction_total_reads"])
-        df["sample_id"] = sample_id  # Add sample ID column
+        df["sample_id"] = custom_sample_id  # Add sample ID column with custom name
         dataframes.append(df)
 
     # Combine all data into a single DataFrame
@@ -68,20 +101,30 @@ def plot_heatmap(data, output_file="taxonomic_abundance_heatmap.html"):
         return
     
     fig = px.imshow(data, 
-                    labels=dict(x="Sample ID", y="Taxon", color="Relative Abundance"),
+                    labels=dict(x="", y="", color="Relative Abundance"),
                     title="Taxonomic Abundance Heatmap Across Samples",
-                    color_continuous_scale='viridis')
+                    color_continuous_scale='mint')
     fig.update_layout(xaxis_tickangle=-45)
+
+    # Save as HTML
     fig.write_html(output_file)
-    fig.show()
     print(f"Heatmap saved to {output_file}")
+    
+    # Show the heatmap
+    fig.show()
+
+    # Ask if the user wants to save as PNG
+    save_as_png = input("Would you like to save the heatmap as a PNG file? (yes/no): ").strip().lower()
+    if save_as_png in ["yes", "y"]:
+        png_file = output_file.replace(".html", ".png")
+        fig.write_image(png_file)
+        print(f"Heatmap saved as PNG to {png_file}")
 
 if __name__ == "__main__":
     # Define input folder and output file
-    input_folder = "/home/viroicbas/scriptTeste/bracken_reports"  # Change this to your folder with Bracken files. Names must end with ...bracken_reports
+    input_folder = "/home/viroicbas/scriptTeste/bracken_reports"  # Change this to your folder with Bracken files
     output_file = "taxonomic_abundance_heatmap.html"  # Change this to your desired output file path
 
     # Load data and generate heatmap
-    heatmap_data = load_bracken_files(input_folder, rank="G", top_n=20)  # Change rank to "S" for species-level, change top in accordance with the top of the script
+    heatmap_data = load_bracken_files(input_folder, rank="G", top_n=15)  # Change rank to "S" for species-level if needed
     plot_heatmap(heatmap_data, output_file)
-
