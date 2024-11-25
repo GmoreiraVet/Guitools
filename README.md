@@ -38,7 +38,7 @@ File Naming: Ensure Bracken report files follow the naming format SAMPLE_bracken
 ##Outputs
 Each script saves visualizations as HTML or PNG files in the working directory, ready for publication.
 
-### :books:<span style="color: green;"> Citation :books:
+# :books:<span style="color: green;"> Citation :books:
 
 If you use Guitools in your research, please consider citing the software. You can generate the citation directly from GitHub by using the "Cite this repository" button located in the repository's header (next to the "Fork" and "Star" buttons). This will generate a citation formatted in the recommended style for GitHub repositories.
 
