@@ -101,7 +101,7 @@ def plot_clustergram(data, output_file="taxonomic_abundance_clustergram.png"):
     num_rows, num_cols = data.shape
     figsize = (num_cols, num_rows)  # Ensure 1:1 aspect ratio for square cells
 
-    # Create the clustergram with square cells
+    # Create the clustergram with square cells and no white borders
     clustergrid = sns.clustermap(
         data,
         row_cluster=True,
@@ -109,7 +109,7 @@ def plot_clustergram(data, output_file="taxonomic_abundance_clustergram.png"):
         method="average",
         metric="braycurtis",
         cmap=custom_cmap,  # Applying the custom continuous color map
-        linewidths=0.5,
+        linewidths=0,  # Set linewidths to 0 to remove borders between cells
         figsize=figsize,  # Adjusted size for square cells
         square=True  # Ensure square cells
     )
