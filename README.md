@@ -26,7 +26,7 @@ Clone the Repository
 git clone https://github.com/GmoreiraVet/Guitools.git
 cd Guitools
 ```
-Usage
+## Usage
 Preparing Input Files
 Input Folder: Place Bracken report files in the designated directory. Default path:
 ```python
