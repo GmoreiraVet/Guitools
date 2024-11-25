@@ -35,7 +35,7 @@ input_folder = "/home/viroicbas/scriptTeste/bracken_reports/"
 Modify input_folder in the scripts if needed.
 File Naming: Ensure Bracken report files follow the naming format SAMPLE_bracken.txt
 
-##Outputs
+## Outputs
 Each script saves visualizations as HTML or PNG files in the working directory, ready for publication.
 
 # :books:<span style="color: green;"> Citation :books:
