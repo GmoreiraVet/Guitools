@@ -16,6 +16,28 @@ def natural_sort(file_paths):
     # Sort the files based on the extracted number from the file name
     return sorted(file_paths, key=lambda x: extract_number(os.path.basename(x)))
 
+
+def get_custom_sample_names(original_names):
+    """
+    Prompt the user to enter custom names for samples.
+    """
+    print("Original sample names detected:")
+    for name in original_names:
+        print(f" - {name}")
+    
+    print("\nEnter custom names for each sample (press Enter to keep the original name):")
+    name_mapping = {}
+    for name in original_names:
+        custom_name = input(f"Custom name for '{name}': ").strip()
+        name_mapping[name] = custom_name if custom_name else name
+    
+    print("\nSample names have been updated:")
+    for old, new in name_mapping.items():
+        print(f" - {old} → {new}")
+    
+    return name_mapping
+
+
 def load_bracken_files(input_folder, rank="G", top_n=15):
     """
     Load and combine Bracken report files from a specified folder, filter by taxonomic level (rank), 
@@ -32,8 +54,11 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
     file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
     file_paths = natural_sort(file_paths)  # Sort files naturally by numeric order
     
-    # Assign sample names automatically based on filenames
-    sample_names = {os.path.basename(file).replace("_bracken.txt", ""): os.path.basename(file).replace("_bracken.txt", "") for file in file_paths}
+    # Extract original sample names
+    sample_ids = [os.path.basename(file).replace("_bracken.txt", "") for file in file_paths]
+    
+    # Allow user to rename samples
+    name_mapping = get_custom_sample_names(sample_ids)
 
     dataframes = []
 
@@ -41,8 +66,8 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
     for file in file_paths:
         sample_id = os.path.basename(file).replace("_bracken.txt", "")
         
-        # Use the automatically assigned sample name
-        custom_sample_name = sample_names.get(sample_id, sample_id)
+        # Map to custom name based on user input
+        custom_sample_name = name_mapping[sample_id]
         
         # Load the Bracken file and assign the custom sample name
         df = pd.read_csv(file, sep="\t", usecols=["name", "taxonomy_lvl", "fraction_total_reads"])
@@ -73,6 +98,16 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
 
     return combined_df_with_other
 
+
+def sample_sort_key(x):
+    """
+    Helper function for sorting sample names, handles both numeric and non-numeric sample names.
+    """
+    # Try to extract a number; if it fails, return the string itself for alphabetical sorting
+    match = re.match(r'(\d+)', x)
+    return (int(match.group(1)) if match else float('inf'), x)
+
+
 def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
     """
     Plot a stacked bar chart of taxonomic abundance using plotly and save to file.
@@ -97,8 +132,8 @@ def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
     # Force "Other" category to be grey
     color_map["Other"] = "gray"
 
-    # Sort the x-axis labels alphabetically or numerically
-    sorted_samples = sorted(data['sample_id'].unique(), key=lambda x: (int(re.match(r'(\d+)', x).group(1)), x))
+    # Sort the x-axis labels, first by numeric order (if applicable) and then alphabetically
+    sorted_samples = sorted(data['sample_id'].unique(), key=sample_sort_key)
 
     # Plot with the automatically mapped colors
     fig = px.bar(data, 
@@ -116,7 +151,9 @@ def plot_stacked_bar(data, output_file="taxonomic_abundance_stacked_bar.html"):
     fig.show()
     print(f"Stacked bar plot saved to {output_file}")
 
+
 if __name__ == "__main__":
+    # Define input folder and output file
     input_folder = "/home/viroicbas/scriptTeste/bracken_reports"
     output_file = "taxonomic_abundance_stacked_bar.html"
     
