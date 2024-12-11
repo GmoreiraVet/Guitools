@@ -6,7 +6,7 @@
 - **Heatmaps**: Taxonomic abundance across samples.
 - **Dendrograms**: Sample clustering based on Bray-Curtis dissimilarity.
 - **Stacked Bar Plots**: Visualize relative abundance across taxonomic groups.
-- **Beta Diversity (PCoA)**: Bray-Curtis dissimilarity for visualizing compositional differences.
+- **Beta Diversity (PCoA)**: Bray-Curtis dissimilarity for visualizing compositional differences (2 and 3  axis).
 - **Bubble Graphs**: Compare taxa abundances.
 - **Rarefaction Curves**: Assess alpha diversity based on sequencing depth.
 
