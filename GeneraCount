@@ -1,0 +1,77 @@
+import pandas as pd
+import glob
+import os
+
+def count_unique_genera(input_folder):
+    """
+    Count the number of unique genera in each sample and across all samples, including the top 3 genera and their estimated reads.
+
+    Args:
+    - input_folder (str): Path to the folder containing Bracken report files.
+
+    Returns:
+    - dict: A dictionary with the number of unique genera per sample, total unique genera, and top genera per sample.
+    """
+    # Get a list of all Bracken files in the input folder
+    file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
+
+    # Store unique genera and top genera for each sample
+    sample_genera = {}
+    top_genera_per_sample = {}
+    overall_genera_counts = {}
+
+    # Load each Bracken report file
+    for file in file_paths:
+        sample_id = os.path.basename(file).replace("_bracken.txt", "")  # Extract sample ID from file name
+        df = pd.read_csv(file, sep="\t", usecols=["name", "taxonomy_lvl", "new_est_reads"])
+
+        # Filter for genus level ('G')
+        genus_df = df[df["taxonomy_lvl"] == "G"]
+        genera = genus_df["name"].unique()
+
+        # Store the unique genera for this sample
+        sample_genera[sample_id] = set(genera)
+
+        # Find the top 3 genera by estimated reads
+        top_genera = genus_df.groupby("name")["new_est_reads"].sum().nlargest(3)
+        top_genera_per_sample[sample_id] = top_genera.to_dict()
+
+        # Accumulate counts for overall genera
+        for genus, reads in genus_df.groupby("name")["new_est_reads"].sum().items():
+            overall_genera_counts[genus] = overall_genera_counts.get(genus, 0) + reads
+
+    # Calculate the total number of unique genera across all samples
+    all_unique_genera = set.union(*sample_genera.values())
+
+    # Find the overall top 3 genera by reads across all samples
+    overall_top_genera = dict(sorted(overall_genera_counts.items(), key=lambda x: x[1], reverse=True)[:3])
+
+    # Output results
+    results = {
+        "unique_genera_per_sample": {sample: len(genera) for sample, genera in sample_genera.items()},
+        "total_unique_genera": len(all_unique_genera),
+        "top_genera_per_sample": top_genera_per_sample,
+        "overall_top_genera": overall_top_genera,
+    }
+
+    return results
+
+if __name__ == "__main__":
+    # Define input folder
+    input_folder = "/home/viroicbas/scriptTeste/bracken_reports"  # Change this to your folder with Bracken files
+
+    # Get the unique genera counts and top genera
+    results = count_unique_genera(input_folder)
+
+    # Print results
+    print("Unique Genera Per Sample:")
+    for sample, count in results["unique_genera_per_sample"].items():
+        print(f" - {sample}: {count} unique genera")
+        print("   Top 3 Genera:")
+        for genus, reads in results["top_genera_per_sample"][sample].items():
+            print(f"     {genus}: {reads} reads")
+
+    print(f"\nTotal Unique Genera Across All Samples: {results['total_unique_genera']}")
+    print("\nTop 3 Genera Across All Samples:")
+    for genus, reads in results["overall_top_genera"].items():
+        print(f" - {genus}: {reads} reads")
