@@ -121,8 +121,10 @@ def plot_clustergram(data, output_file="taxonomic_abundance_clustergram.png"):
     plt.show()
 
 if __name__ == "__main__":
-    # Define input folder and output file
-    input_folder = "/home/viroicbas/scriptTeste/bracken_reports"  # Change this to your folder with Bracken files
+    # Ask for the input folder path
+    input_folder = input("Enter the path to the folder containing Bracken report files: ").strip()
+    
+    # Define the output file
     output_file = "taxonomic_abundance_clustergram.png"  # Change this to your desired output file path
 
     # Load data and generate clustergram
