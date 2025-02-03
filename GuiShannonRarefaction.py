@@ -166,7 +166,9 @@ def print_success_ascii():
     """)
 
 if __name__ == "__main__":
-    input_folder = "/home/viroicbas/scriptTeste/bracken_reports"  # Update with your folder containing Bracken files
+    # Prompt for folder path
+    input_folder = input("Enter the path to the folder containing Bracken report files: ")
+    
     output_file = "rarefaction_curve_with_shannon.html"
     
     # Load Bracken files
@@ -182,4 +184,3 @@ if __name__ == "__main__":
 
     # After plotting, print the success message with the ASCII bunny
     print_success_ascii()
-
