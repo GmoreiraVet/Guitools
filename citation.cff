@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "Guitools"
+authors:
+  - family-names: "Moreira"
+    given-names: "Guilherme"
+    orcid: "https://orcid.org/0000-0000-0000-0000"  # Replace with actual ORCID if available
+date-released: "2025-02-13"  # Update to actual release date
+version: "1.0.0"  # Update if a specific version exists
+repository-code: "https://github.com/GmoreiraVet/Guitools"
+license: "MIT"  # Update if using a different license
+doi: "10.5281/zenodo.0000000"  # Replace with actual DOI if available
