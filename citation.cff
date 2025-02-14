@@ -4,9 +4,8 @@ title: "Guitools"
 authors:
   - family-names: "Moreira"
     given-names: "Guilherme"
-    orcid: "https://orcid.org/0000-0000-0000-0000"  # Replace with actual ORCID if available
-date-released: "2025-02-13"  # Update to actual release date
-version: "1.0.0"  # Update if a specific version exists
+    orcid: "https://orcid.org/0009-0002-2828-7202
+date-released: "2025-02-13" 
+version: "1.1.1" 
 repository-code: "https://github.com/GmoreiraVet/Guitools"
-license: "MIT"  # Update if using a different license
-doi: "10.5281/zenodo.0000000"  # Replace with actual DOI if available
+doi: https://doi.org/10.5281/zenodo.14870717
