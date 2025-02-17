@@ -24,7 +24,7 @@ def get_custom_sample_names(original_names):
         print(f" - {old} → {new}")
     return name_mapping
 
-def load_bracken_files(input_folder, rank="G", top_n=15):
+def load_bracken_files(input_folder, rank="G", top_n=15, include_other=True):
     file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
     file_paths = natural_sort(file_paths)
     sample_ids = [os.path.basename(file).replace("_bracken.txt", "") for file in file_paths]
@@ -43,11 +43,13 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
         return pd.DataFrame()
     top_taxa = filtered_df.groupby("name")["fraction_total_reads"].sum().nlargest(top_n).index
     top_taxa_df = filtered_df[filtered_df["name"].isin(top_taxa)]
-    other_taxa_df = filtered_df[~filtered_df["name"].isin(top_taxa)]
-    other_taxa_sum = other_taxa_df.groupby(["sample_id"])["fraction_total_reads"].sum().reset_index()
-    other_taxa_sum["name"] = "Other"
-    combined_df_with_other = pd.concat([top_taxa_df, other_taxa_sum])
-    return combined_df_with_other
+    if include_other:
+        other_taxa_df = filtered_df[~filtered_df["name"].isin(top_taxa)]
+        other_taxa_sum = other_taxa_df.groupby(["sample_id"])["fraction_total_reads"].sum().reset_index()
+        other_taxa_sum["name"] = "Other"
+        combined_df_with_other = pd.concat([top_taxa_df, other_taxa_sum])
+        return combined_df_with_other
+    return top_taxa_df
 
 def plot_treemap(data, output_file="taxonomic_abundance_treemap.html"):
     if data.empty:
@@ -65,6 +67,8 @@ def plot_treemap(data, output_file="taxonomic_abundance_treemap.html"):
 
 if __name__ == "__main__":
     input_folder = input("Enter the path to the folder containing Bracken report files: ").strip()
+    top_n = int(input("Enter the number of top genera to be plotted: ").strip())
+    include_other = input("Include 'Other' category in the plot? (yes/no): ").strip().lower() == "yes"
     output_file = "taxonomic_abundance_treemap.html"
-    treemap_data = load_bracken_files(input_folder, rank="G", top_n=15)
+    treemap_data = load_bracken_files(input_folder, rank="G", top_n=top_n, include_other=include_other)
     plot_treemap(treemap_data, output_file)
