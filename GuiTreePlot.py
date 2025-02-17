@@ -26,10 +26,6 @@ def get_custom_sample_names(original_names):
 
 def load_bracken_files(input_folder, rank="G", top_n=15):
     file_paths = glob.glob(os.path.join(input_folder, "*.txt"))
-    if not file_paths:
-        print("No Bracken files found in the provided directory.")
-        return pd.DataFrame()
-    
     file_paths = natural_sort(file_paths)
     sample_ids = [os.path.basename(file).replace("_bracken.txt", "") for file in file_paths]
     name_mapping = get_custom_sample_names(sample_ids)
@@ -68,10 +64,7 @@ def plot_treemap(data, output_file="taxonomic_abundance_treemap.html"):
     print(f"Treemap plot saved to {output_file}")
 
 if __name__ == "__main__":
-    input_folder = input("Enter the path to the folder containing Bracken files: ").strip()
-    while not os.path.isdir(input_folder):
-        print("Invalid folder path. Please try again.")
-        input_folder = input("Enter the path to the folder containing Bracken files: ").strip()
+    input_folder = input("Enter the path to the folder containing Bracken report files: ").strip()
     output_file = "taxonomic_abundance_treemap.html"
     treemap_data = load_bracken_files(input_folder, rank="G", top_n=15)
     plot_treemap(treemap_data, output_file)
