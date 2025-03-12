@@ -48,6 +48,10 @@ def load_bracken_files(input_folder, rank="G", top_n=15):
         custom_sample_id = name_mapping[sample_id]  # Map to custom name
         df = pd.read_csv(file, sep="\t", usecols=["name", "taxonomy_lvl", "fraction_total_reads"])
         df["sample_id"] = custom_sample_id  # Add sample ID column with custom name
+        
+        # Drop duplicates based on 'name' and 'sample_id', keeping only the first occurrence
+        df = df.drop_duplicates(subset=["name", "sample_id"], keep="first")
+        
         dataframes.append(df)
 
     # Combine all data into a single DataFrame
