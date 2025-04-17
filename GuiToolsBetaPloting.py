@@ -59,22 +59,29 @@ def main():
         i_file.close()
         num_samples += 1
 
-    # Step 2: Calculate Bray-Curtis Dissimilarities
+    # Step 2: Convert Counts to Relative Abundances
+    i2relative_abundance = {}
+    for sample_id in range(num_samples):
+        total = i2totals[sample_id]
+        i2relative_abundance[sample_id] = {}
+        for category, count in i2counts[sample_id].items():
+            i2relative_abundance[sample_id][category] = count / total  # relative abundance
+
+    # Step 3: Calculate Bray-Curtis Dissimilarities Based on Relative Abundance
     bc = np.zeros((num_samples, num_samples))
     for i in range(0, num_samples):
-        i_tot = i2totals[i]
         for j in range(i + 1, num_samples):
-            j_tot = i2totals[j]
             C_ij = 0.0
-            for cat in i2counts[i]:
-                if cat in i2counts[j]:
-                    C_ij += min(i2counts[i][cat], i2counts[j][cat])
+            # Compare categories in the two samples
+            for cat in i2relative_abundance[i]:
+                if cat in i2relative_abundance[j]:
+                    C_ij += min(i2relative_abundance[i][cat], i2relative_abundance[j][cat])
             # Calculate Bray-Curtis dissimilarity
-            bc_ij = 1.0 - ((2.0 * C_ij) / float(i_tot + j_tot))
+            bc_ij = 1.0 - (2.0 * C_ij)
             bc[i][j] = bc_ij
             bc[j][i] = bc_ij
 
-    # Step 3: Perform PCoA
+    # Step 4: Perform PCoA
     dist_matrix = DistanceMatrix(bc.tolist(), list(range(num_samples)))
     pcoa_results = pcoa(dist_matrix)
 
@@ -88,12 +95,12 @@ def main():
         'PC5': pcoa_results.samples['PC5'],
     })
 
-    # Step 4: Add jitter to PC1 and PC2 values
+    # Step 5: Add jitter to PC1 and PC2 values
     jitter_strength = 0.01  # Adjust this value for more or less jitter
     pcoa_df['PC1'] += np.random.uniform(-jitter_strength, jitter_strength, size=len(pcoa_df))
     pcoa_df['PC2'] += np.random.uniform(-jitter_strength, jitter_strength, size=len(pcoa_df))
 
-    # Step 5: Calculate variance explained for each PC
+    # Step 6: Calculate variance explained for each PC
     explained_variance = pcoa_results.proportion_explained * 100  # Multiply by 100 for percentage
     pc1_variance = explained_variance[0]
     pc2_variance = explained_variance[1]
@@ -125,4 +132,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
